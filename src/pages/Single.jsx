@@ -1,37 +1,70 @@
-// Import necessary hooks and components from react-router-dom and other libraries.
 import { Link, useParams } from "react-router-dom";  // To use link for navigation and useParams to get URL parameters
-import PropTypes from "prop-types";  // To define prop types for this component
-import rigoImageUrl from "../assets/img/rigo-baby.jpg"  // Import an image asset
 import useGlobalReducer from "../hooks/useGlobalReducer";  // Import a custom hook for accessing the global state
+import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 
-// Define and export the Single component which displays individual item details.
-export const Single = props => {
-  // Access the global state using the custom hook.
+const Single = () => {
   const { store } = useGlobalReducer()
+  const { subj, uid } = useParams()
+  const [currentData, setCurrentData] = useState({})
+  const [keys, setKeys] = useState([])
+  const navigate = useNavigate()
 
-  // Retrieve the 'theId' URL parameter using useParams hook.
-  const { theId } = useParams()
-  const singleTodo = store.todos.find(todo => todo.id === parseInt(theId));
+  //EFFECT QUE RECAUDA INFORMACION DEL SUJETO (subj) CON SU ID (uid)
+
+  useEffect(() => {
+    const getData = async () => {
+      try {
+        let response = await fetch(`https://www.swapi.tech/api/${subj}/${uid}`)
+        if (!response.ok) {
+          throw new Error("getData no OK")
+        }
+        let data = await response.json()
+        setCurrentData(data.result.properties)
+      } catch (error) {
+        console.error(error)
+      }
+    }
+    getData()
+  }, [])
+
+  //EFFECT QUE ACTUALIZA LAS PROPIEDADES DEL SUJETO SELECCIONADO
+
+  useEffect(() => {
+    setKeys(Object.getOwnPropertyNames(currentData))
+  }, [currentData])
 
   return (
-    <div className="container text-center">
-      {/* Display the title of the todo element dynamically retrieved from the store using theId. */}
-      <h1 className="display-4">Todo: {singleTodo?.title}</h1>
-      <hr className="my-4" />  {/* A horizontal rule for visual separation. */}
-
-      {/* A Link component acts as an anchor tag but is used for client-side routing to prevent page reloads. */}
-      <Link to="/">
-        <span className="btn btn-primary btn-lg" href="#" role="button">
-          Back home
-        </span>
-      </Link>
+    <div className="d-flex flex-column align-items-center">
+      <h1>{currentData.name}</h1>
+      <div className="d-flex justify-content-around">
+        <img src="https://placehold.co/800x600" alt="placeholder 800x600" style={{maxWidth:"40%"}}/>
+        <p style={{maxWidth:"40%"}}>Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. 
+          Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. 
+          Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. 
+          Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.</p>
+      </div>
+      <div className="d-flex flex-row-reverse m-1" style={{ minHeight: "fit-content", overflow: "scroll" }}>
+        {keys.length > 0 && keys.map((ele, indx) => {
+          if (!Array.isArray(currentData[ele]) && !currentData[ele].includes("https")) {
+            var keyName = ele.replace("_", " ")
+            keyName = keyName[0].toUpperCase() + keyName.slice(1)
+            return (
+              <div key={indx} className="d-flex flex-column m-3 justify-content-center border border-secondary" style={{ minWidth: "max-content", minHeight: "fit-content" }}>
+                <div className="d-flex justify-content-center align-items-center flex-column p-0">
+                  <h5 className=" p-1 m-0" style={{ minWidth: "100%", height: "50%" }}>{keyName}</h5>
+                  <h5 className="border-top border-tertiary p-1 text-center m-0" style={{ minWidth: "100%", height: "50%" }}>{currentData[ele]}</h5>
+                </div>
+              </div>
+            )
+          }
+        })}
+      </div>
+      <button className="btn btn-primary" onClick={()=>{navigate("/")}} style={{maxWidth:"max-content"}}>Volver</button>
     </div>
   );
 };
 
-// Use PropTypes to validate the props passed to this component, ensuring reliable behavior.
-Single.propTypes = {
-  // Although 'match' prop is defined here, it is not used in the component.
-  // Consider removing or using it as needed.
-  match: PropTypes.object
-};
+export default Single
+
+

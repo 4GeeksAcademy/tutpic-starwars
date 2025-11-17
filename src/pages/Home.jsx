@@ -1,16 +1,20 @@
-import rigoImageUrl from "../assets/img/rigo-baby.jpg";
 import useGlobalReducer from "../hooks/useGlobalReducer.jsx";
+import Listas from "../components/Listas.jsx";
 
-export const Home = () => {
+const Home = () => {
 
-  const {store, dispatch} =useGlobalReducer()
+	const { store, dispatch } = useGlobalReducer()
 
 	return (
-		<div className="text-center mt-5">
-			<h1>Hello Rigo!!</h1>
-			<p>
-				<img src={rigoImageUrl} />
-			</p>
+		<div>
+			<h1>Personajes</h1>
+			<Listas subj={"people"} list={store.peopleList}/>
+			<h1>Planetas</h1>
+			<Listas subj={"planets"} list={store.planetsList}/>
+			<h1>Vehículos</h1>
+			<Listas subj={"vehicles"} list={store.vehiclesList}/>
 		</div>
 	);
 }; 
+
+export default Home
